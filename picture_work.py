@@ -1,5 +1,4 @@
 from PIL import Image
-from gradio_client import Client, handle_file
 import os
 import pytesseract
 
