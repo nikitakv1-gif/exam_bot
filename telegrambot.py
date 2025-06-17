@@ -44,7 +44,7 @@ async def ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	global chat
 	bots = update_tokens()
 	if update.message.text not in bots.keys():
-		text = chat.send_message(update.message.text + "Реши все теоретические и практические задачи, подробно распиши теорию и практику, если ты не видишь задачи, то ее не надо придумывать, решай только теоретические вопросы и наоборот формулы для задачи отдавай в человекочитаемом виде, не в Latex")
+		text = chat.send_message(update.message.text + "Реши все теоретические и практические задачи, подробно распиши теорию и практику, если ты не видишь задачи, то ее не надо придумывать, решай только теоретические вопросы и наоборот формулы для задачи отдавай в человекочитаемом виде, не в Latex. Обязательно ответь на все пункты")
 		await update.message.reply_text(text)
 	elif update.message.text in bots.keys():
 		await update.message.reply_text(
@@ -62,7 +62,7 @@ async def pic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 		file = await new_file.download_to_drive()
 		text_question = await picture_response(update, file)
 		if text_question is not None:
-			text = chat.send_message(text_question + "Реши все теоретические и практические задачи, подробно распиши теорию и практику, если ты не видишь задачи, то ее не надо придумывать, решай только теоретические вопросы и наоборот формулы для задачи отдавай в человекочитаемом виде, не в Latex")
+			text = chat.send_message(text_question + "Реши все теоретические и практические задачи, подробно распиши теорию и практику, если ты не видишь задачи, то ее не надо придумывать, решай только теоретические вопросы и наоборот формулы для задачи отдавай в человекочитаемом виде, не в Latex. Обязательно ответь на все пункты")
 			await update.message.reply_text(f'Текст с фото{text_question}')
 			await update.message.reply_text(text)
 		
