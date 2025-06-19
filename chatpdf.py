@@ -1,4 +1,5 @@
 import requests 
+import re
 
 class ChatBot:
 
@@ -21,11 +22,11 @@ class ChatBot:
 				    }
 				  ]
 				}
-		print(data)
+		if self.url == 'url':
+			return "Пожалуйста выберете экзамен"
 		answer = requests.post(self.url, headers = self.headers, json = data)
-		if answer.status_code == 200:
-		    print('Result:', answer.json()['content'])
-		else:
-		    print('Status:', answer.status_code)
-		    print('Error:', answer.text)
-		return answer.json()['content']
+		content = answer.json()['content']
+		# chars_to_escape = r'_*[]()~`>#+-=|{}.!'
+		# for char in chars_to_escape:
+		# 	content = content.replace(char, f'\\{char}')
+		return content
