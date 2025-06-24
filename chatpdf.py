@@ -3,9 +3,10 @@ import re
 
 class ChatBot:
 
-	def __init__(self, source_id, url, api_key):
+	def __init__(self, source_id, url, api_key, upload_url):
 		self.source_id = 'cha_' + source_id
 		self.url = url
+		self.upload_url = upload_url
 		self.api_key = api_key
 		self.headers = headers = {
 								    "x-api-key": api_key,
@@ -30,3 +31,10 @@ class ChatBot:
 		# for char in chars_to_escape:
 		# 	content = content.replace(char, f'\\{char}')
 		return content
+	def upload_file(self, file):
+		if self.url_upload == 'url_upload':
+			return "Пожалуйста выберете экзамен"
+		files = [('file', ('file', open(file, 'rb'), 'application/octet-stream'))]
+		answer = requests.post(self.upload_url, headers = headers, files = files)
+
+		return answer.json()['sourceId']

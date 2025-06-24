@@ -17,12 +17,14 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 url = 'https://api.chatpdf.com/v1/chats/message'
 
+url_upload = 'https://api.chatpdf.com/sources/add-file'
+
 load_dotenv()
 
 api_key = os.getenv('CHATPDF_API_KEY')  
 bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
 
-chat = ChatBot('sourse_id', 'url', 'api_key')
+chat = ChatBot('sourse_id', 'url', 'api_key', 'url_upload')
 
 
 def exam_keyboard():
@@ -57,7 +59,7 @@ async def ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
 			"Экзамен выбран, задавайте вопросы",
 			reply_markup = exam_keyboard())
 
-		chat = ChatBot(bots[update.message.text], url, api_key)
+		chat = ChatBot(bots[update.message.text], url, api_key, url_upload)
 
 
 async def pic(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -78,8 +80,23 @@ async def pic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 			await update.message.reply_text(f'Текст с фото{text_question}')
 			await update.message.reply_text(text)
 		
+async def document(update: Update, context: ContextTypes.DEFAULT_TYPE):
+	await update.message.reply_text("Добавляю файл в свою бибилотеку")
+
+	if update.message.text:
+		text = update.message.text
+	else:
+		await update.message.reply_text("Загрузите файл и напишите название предмета")
+
+	doc = update.message['document']['file_id'].get_file()
+	fileName = update.message['document']['file_name']
 
 
+
+	chat.upload_file(text, fileName)
+
+	await update.message.reply_text("Загрузил")
+    
 
 
 
@@ -90,6 +107,7 @@ def main():
 	application.add_handler(CommandHandler('start', start))
 	application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ans))
 	application.add_handler(MessageHandler(filters.PHOTO, pic))
+	application.add_handler(MessageHandler(filters.DOCUMENT, document))
 
 
 	application.run_polling()
