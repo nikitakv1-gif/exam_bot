@@ -80,20 +80,25 @@ async def pic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 			await update.message.reply_text(f'Текст с фото{text_question}')
 			await update.message.reply_text(text)
 		
-async def document(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+	print(update.message.caption)
+	if update.message.caption:
+		text = update.message.caption
+	else:
+		await update.message.reply_text("При загрузке пишите название предмета")
+		return
+	
 	await update.message.reply_text("Добавляю файл в свою бибилотеку")
 
-	if update.message.text:
-		text = update.message.text
-	else:
-		await update.message.reply_text("Загрузите файл и напишите название предмета")
+	document = update.message.document
+	file_id = document.file_id
+	file_name = document.file_name
+	file = await context.bot.get_file(file_id)
+	await file.download_to_drive()
+	chat.upload_file(text, file)
 
-	doc = update.message['document']['file_id'].get_file()
-	fileName = update.message['document']['file_name']
-
-
-
-	chat.upload_file(text, fileName)
+	os.remove(file)
 
 	await update.message.reply_text("Загрузил")
     
@@ -107,7 +112,7 @@ def main():
 	application.add_handler(CommandHandler('start', start))
 	application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ans))
 	application.add_handler(MessageHandler(filters.PHOTO, pic))
-	application.add_handler(MessageHandler(filters.DOCUMENT, document))
+	application.add_handler(MessageHandler(filters.Document.ALL, doc))
 
 
 	application.run_polling()

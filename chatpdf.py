@@ -4,7 +4,7 @@ import re
 class ChatBot:
 
 	def __init__(self, source_id, url, api_key, upload_url):
-		self.source_id = 'cha_' + source_id
+		self.source_id = source_id
 		self.url = url
 		self.upload_url = upload_url
 		self.api_key = api_key
