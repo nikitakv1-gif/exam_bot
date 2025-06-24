@@ -2,7 +2,7 @@ import logging
 import json
 from chatpdf import ChatBot
 import json 
-from config import update_tokens
+from config import update_tokens, upload_tokens
 import os
 from dotenv import load_dotenv
 from picture_work import picture_response
@@ -17,19 +17,19 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 url = 'https://api.chatpdf.com/v1/chats/message'
 
-url_upload = 'https://api.chatpdf.com/sources/add-file'
+url_upload = 'https://api.chatpdf.com/v1/sources/add-file'
 
 load_dotenv()
 
 api_key = os.getenv('CHATPDF_API_KEY')  
 bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
 
-chat = ChatBot('sourse_id', 'url', 'api_key', 'url_upload')
+chat = ChatBot('sourse_id', 'url', api_key)
 
 
 def exam_keyboard():
 	
-	keyboard = [[ KeyboardButton(i) for i in update_tokens().keys()]]
+	keyboard = [[ KeyboardButton(i) for i in update_tokens().keys()], ['Загрузить новый файл']]
 
 	reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard = True)
 
@@ -59,7 +59,7 @@ async def ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
 			"Экзамен выбран, задавайте вопросы",
 			reply_markup = exam_keyboard())
 
-		chat = ChatBot(bots[update.message.text], url, api_key, url_upload)
+		chat = ChatBot(bots[update.message.text], url, api_key)
 
 
 async def pic(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -95,13 +95,26 @@ async def doc(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	file_id = document.file_id
 	file_name = document.file_name
 	file = await context.bot.get_file(file_id)
-	await file.download_to_drive()
-	chat.upload_file(text, file)
+	path = await file.download_to_drive()
 
-	os.remove(file)
+	link = chat.upload_file(str(path), url_upload)
+
+	upload_tokens(text, link)
+
+	os.remove(path)
 
 	await update.message.reply_text("Загрузил")
     
+async def link_to_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+	data = update.message.text.split(' ')
+	link = chat.upload_by_link(data[0])
+
+	if link is not None:
+		upload_tokens(data[1:], link)
+		await update.message.reply_text("Успешно загрузил")
+	else:
+		await update.message.reply_text("Что то пошло не так, сори бро")
 
 
 
@@ -110,6 +123,7 @@ def main():
 
 	application = Application.builder().token(bot_token).build()
 	application.add_handler(CommandHandler('start', start))
+	application.add_handler(MessageHandler(filters.Regex(r'^http'), link_to_file))
 	application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ans))
 	application.add_handler(MessageHandler(filters.PHOTO, pic))
 	application.add_handler(MessageHandler(filters.Document.ALL, doc))
